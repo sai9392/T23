@@ -27,7 +27,3 @@
         msg: "CPU usage exceeded {{ cpu_threshold }}% (Current: {{ cpu_usage }}%)"
       when: cpu_usage | int > cpu_threshold
  
-    - name: Fail if CPU usage exceeded threshold
-      fail:
-        msg: "CPU usage exceeded {{ cpu_threshold }}% on this host"
-      when: cpu_usage | int > cpu_threshold
