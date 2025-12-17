@@ -1,0 +1,33 @@
+---
+- name: Check CPU Utilization on RHEL 9.4
+  hosts: Sample-Test-Server
+  become: true
+  gather_facts: no
+ 
+  vars:
+    cpu_threshold: 80   # Percentage
+ 
+  tasks:
+    - name: Get CPU idle percentage
+      shell: |
+        top -bn1 | grep "Cpu(s)" | awk '{print $8}' | cut -d. -f1
+      register: cpu_idle
+      changed_when: false
+ 
+    - name: Calculate CPU usage percentage
+      set_fact:
+        cpu_usage: "{{ 100 - cpu_idle.stdout | int }}"
+ 
+    - name: Display CPU usage
+      debug:
+        msg: "Current CPU Usage: {{ cpu_usage }}%"
+ 
+    - name: Warn if CPU usage exceeded threshold
+      debug:
+        msg: "CPU usage exceeded {{ cpu_threshold }}% (Current: {{ cpu_usage }}%)"
+      when: cpu_usage | int > cpu_threshold
+ 
+    - name: Fail if CPU usage exceeded threshold
+      fail:
+        msg: "CPU usage exceeded {{ cpu_threshold }}% on this host"
+      when: cpu_usage | int > cpu_threshold
