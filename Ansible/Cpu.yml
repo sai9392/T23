@@ -10,7 +10,7 @@
   tasks:
     - name: Get CPU idle percentage
       shell: |
-        top -bn1 | grep "Cpu(s)" | awk '{print $8}' | cut -d. -f1
+        top -bn5 | grep "Cpu(s)" | awk '{print $8}' | cut -d. -f1
       register: cpu_idle
       changed_when: false
  
