@@ -1,0 +1,94 @@
+---
+
+- name: RHEL 9.4 VM Health Check (Non-root SSH)
+
+  hosts: web-server
+
+  gather_facts: yes
+
+  become: yes
+
+  #become_user: root
+
+  tasks:
+
+    - name: Show OS version
+
+      debug:
+
+        msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Show uptime
+
+      command: uptime
+
+      register: uptime_output
+
+    - debug:
+
+        msg: "{{ uptime_output.stdout }}"
+
+    - name: Check CPU load
+
+      command: cat /proc/loadavg
+
+      register: cpu_load
+
+    - debug:
+
+        msg: "CPU Load: {{ cpu_load.stdout }}"
+
+    - name: Check memory usage
+
+      command: free -h
+
+      register: memory_output
+
+    - debug:
+
+        msg: "{{ memory_output.stdout_lines }}"
+
+    - name: Check disk usage
+
+      command: df -h
+
+      register: disk_output
+
+    - debug:
+
+        msg: "{{ disk_output.stdout_lines }}"
+
+    - name: Ensure SSH service is running
+
+      systemd:
+
+        name: sshd
+
+        state: started
+
+    - name: Ensure firewalld service is running
+
+      systemd:
+
+        name: firewalld
+
+        state: started
+
+    - name: Network connectivity test
+
+      command: ping -c 3 8.8.8.8
+
+      register: ping_result
+
+      ignore_errors: yes
+
+    - debug:
+
+        msg: >
+
+          Network is {{
+
+          'reachable' if ping_result.rc == 0 else 'NOT reachable'
+
+          }}
+ 
